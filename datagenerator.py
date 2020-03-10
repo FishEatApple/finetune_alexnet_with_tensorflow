@@ -7,7 +7,7 @@
 import tensorflow as tf
 import numpy as np
 
-from tensorflow.contrib.data import Dataset
+from tensorflow.data import Dataset
 from tensorflow.python.framework import dtypes
 from tensorflow.python.framework.ops import convert_to_tensor
 
@@ -66,13 +66,18 @@ class ImageDataGenerator(object):
         data = Dataset.from_tensor_slices((self.img_paths, self.labels))
 
         # distinguish between train/infer. when calling the parsing functions
+        # if mode == 'training':
+        #     data = data.map(self._parse_function_train, num_threads=8,
+        #               output_buffer_size=100*batch_size)
+        #
+        # elif mode == 'inference':
+        #     data = data.map(self._parse_function_inference, num_threads=8,
+        #               output_buffer_size=100*batch_size)
         if mode == 'training':
-            data = data.map(self._parse_function_train, num_threads=8,
-                      output_buffer_size=100*batch_size)
+            data = data.map(self._parse_function_train)
 
         elif mode == 'inference':
-            data = data.map(self._parse_function_inference, num_threads=8,
-                      output_buffer_size=100*batch_size)
+            data = data.map(self._parse_function_inference)
 
         else:
             raise ValueError("Invalid mode '%s'." % (mode))
@@ -90,12 +95,26 @@ class ImageDataGenerator(object):
         """Read the content of the text file and store it into lists."""
         self.img_paths = []
         self.labels = []
-        with open(self.txt_file, 'r') as f:
-            lines = f.readlines()
-            for line in lines:
-                items = line.split(' ')
-                self.img_paths.append(items[0])
-                self.labels.append(int(items[1]))
+        # with open(self.txt_file, 'r') as f:
+        #     lines = f.readlines()
+        #     for line in lines:
+        #         items = line.split(' ')
+        #         self.img_paths.append(items[0])
+        #         self.labels.append(int(items[1]))
+        if self.txt_file=='./path/to/train.txt':
+            for index in range(0,10000):
+                self.img_paths.append('./path/to/train/train/cat.'+str(index)+'.jpg')
+                self.labels.append(0)
+            for index in range(0,10000):
+                self.img_paths.append('./path/to/train/train/dog.'+str(index)+'.jpg')
+                self.labels.append(1)
+        if self.txt_file=='./path/to/val.txt':
+            for index in range(10000,12500):
+                self.img_paths.append('./path/to/train/train/cat.'+str(index)+'.jpg')
+                self.labels.append(0)
+            for index in range(10000,12500):
+                self.img_paths.append('./path/to/train/train/dog.'+str(index)+'.jpg')
+                self.labels.append(1)
 
     def _shuffle_lists(self):
         """Conjoined shuffling of the list of paths and labels."""

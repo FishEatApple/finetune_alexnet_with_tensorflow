@@ -20,18 +20,18 @@ import tensorflow as tf
 from alexnet import AlexNet
 from datagenerator import ImageDataGenerator
 from datetime import datetime
-from tensorflow.contrib.data import Iterator
+from tensorflow.data import Iterator
 
 """
 Configuration Part.
 """
 
 # Path to the textfiles for the trainings and validation set
-train_file = '/path/to/train.txt'
-val_file = '/path/to/val.txt'
+train_file = './path/to/train.txt'
+val_file = './path/to/val.txt'
 
 # Learning params
-learning_rate = 0.01
+learning_rate = 0.001
 num_epochs = 10
 batch_size = 128
 
@@ -44,8 +44,8 @@ train_layers = ['fc8', 'fc7', 'fc6']
 display_step = 20
 
 # Path for tf.summary.FileWriter and to store model checkpoints
-filewriter_path = "/tmp/finetune_alexnet/tensorboard"
-checkpoint_path = "/tmp/finetune_alexnet/checkpoints"
+filewriter_path = "./tmp/finetune_alexnet/tensorboard"
+checkpoint_path = "./tmp/finetune_alexnet/checkpoints"
 
 """
 Main Part of the finetuning Script.
@@ -139,8 +139,12 @@ saver = tf.train.Saver()
 train_batches_per_epoch = int(np.floor(tr_data.data_size/batch_size))
 val_batches_per_epoch = int(np.floor(val_data.data_size / batch_size))
 
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.5
+config.gpu_options.allow_growth = True
+config.gpu_options.allocator_type = 'BFC'
 # Start Tensorflow session
-with tf.Session() as sess:
+with tf.Session(config=config) as sess:
 
     # Initialize all variables
     sess.run(tf.global_variables_initializer())
